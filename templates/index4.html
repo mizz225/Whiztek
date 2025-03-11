@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Sentiment Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            width:55%
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 20px; /* Add some margin to the right of the Predict button */
+        }
+
+        #prediction-output {
+            padding: 20px;
+            background-color: #f5f5f5;
+            margin-top: 30px;
+            width:55%
+        }
+
+       .highlight {
+            background-color: yellow;
+        }
+        #sample-keywords {
+            float: right;
+            width: 40%;
+            padding: 20px;
+            background-color: #f5f5f5;
+            margin-top: -170px;
+            margin-right: -300px;
+            font-size:13px
+        }
+
+        #sample-keywords h2 {
+            margin-top: 0;
+        }
+
+        #sample-keywords ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #sample-keywords li {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #sample-keywords li:hover {
+            background-color: #f0f0f0;
+        }
+        .news-item {
+            margin-bottom: 20px; /* Add space between each news item */
+        }
+    </style>
+</head>
+<body>
+    <h1>Crypto Comment Sentiment Analysis</h1>
+
+    <form method="post" action="/predict" id="prediction-form">
+        <label for="comment">Comment</label><br>
+        <input type="text" id="comment" name="comment"><br><br>
+        <input type="submit" value="Fetch">
+        <input type="button" value="Clear Output" id="clear-output-button">
+    </form>
+
+    <div id="sample-keywords">
+        <h2>Sample Comments to test</h2>
+        <ul>
+            <li>I'm actually excited because I had cash on the side for moments like this</li>
+            <li>The exchanges were so irresponsible to list these tokens. Luna should've been allowed to die</li>
+            <li>Stay away from Doge Scam</li>
+            <li>LUNA price is expected to drop</li>
+        </ul>
+    </div>
+
+    <h2 id="prediction-header" style="display: none;">Predicted Sentiment</h2>
+    <div id="prediction-output"></div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var commentt = document.getElementById('comment').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/predict');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var outputDiv = document.getElementById('prediction-output');
+                    outputDiv.innerHTML = '';
+
+                    var headerDiv = document.getElementById('prediction-header');
+                    headerDiv.style.display = 'block';
+
+                    var list = document.createElement('ul');
+
+                    response.forEach(function(item) {
+                        var listItem = document.createElement('li');
+                        listItem.className = 'news-item'; // Apply margin to each news item
+                        listItem.innerHTML = `
+                            <strong>${item.sentiment}</strong>
+                        `;
+                        list.appendChild(listItem);
+                    });
+
+                    outputDiv.appendChild(list);
+                } else {
+                    document.getElementById('prediction-output').textContent = 'Error: ' + xhr.statusText;
+                }
+            };
+            xhr.send('comment=' + encodeURIComponent(commentt));
+        });
+
+        document.getElementById('clear-output-button').addEventListener('click', function() {
+            var outputDiv = document.getElementById('prediction-output');
+            outputDiv.innerHTML = '';
+
+            var headerDiv = document.getElementById('prediction-header');
+            headerDiv.style.display = 'none';
+
+            outputDiv.classList.remove('highlight');
+        });
+    </script>
+</body>
+</html>
